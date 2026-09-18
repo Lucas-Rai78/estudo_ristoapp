@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ristoapp-db
+    environment:
+      POSTGRES_USER: ristoapp
+      POSTGRES_PASSWORD: ristoapp_dev_password
+      POSTGRES_DB: ristoapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ristoapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ristoapp-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ristoapp-backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://ristoapp:ristoapp_dev_password@db:5432/ristoapp}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/main.py:/app/main.py
+      - ./backend/alembic:/app/alembic
+      - ./backend/alembic.ini:/app/alembic.ini
+    networks:
+      - ristoapp-network
+    command: fastapi dev ./src/main.py --host 0.0.0.0
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ristoapp-frontend
+    environment:
+      VITE_API_BASE_URL: "http://localhost:8000"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+    networks:
+      - ristoapp-network
+    command: npm run dev -- --host
+
+volumes:
+  postgres_data:
+
+networks:
+  ristoapp-network:
+    driver: bridge

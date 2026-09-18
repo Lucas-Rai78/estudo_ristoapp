@@ -22,8 +22,9 @@ O projeto adota uma arquitetura desacoplada e fortemente tipada ponta a ponta:
 | Camada | Tecnologia | Hospedagem / Infra |
 | :--- | :--- | :--- |
 | **Frontend** | Vue 3 (Composition API) + TypeScript + Vite | [Vercel](https://vercel.com/) |
-| **Backend** | Python 3.9+ + FastAPI + Pydantic | [Render](https://render.com/) |
-| **Banco de Dados** | PostgreSQL + SQLAlchemy 2.0 (Async) + Alembic | [Neon Serverless](https://neon.com/) |
+| **Backend** | Python 3.14 + FastAPI + Pydantic | [Render](https://render.com/) |
+| **Banco de Dados** | PostgreSQL 16 + SQLAlchemy 2.0 + Alembic | [Neon Serverless](https://neon.com/) |
+| **Driver DB** | psycopg3 (`psycopg[binary,pool]`) | — |
 | **DevOps & Containers** | Docker & Docker Compose, GitHub Actions | CI/CD automatizado |
 
 ---
@@ -34,7 +35,7 @@ A infraestrutura segue o modelo descentralizado PaaS (*Platform as a Service*):
 
 1. **SPA (Vercel):** Distribuição global de arquivos estáticos em milissegundos.
 2. **API RESTful (Render):** Servidor assíncrono processando regras de negócio e validações rigorosas de estoque via Pydantic.
-3. **Database Serverless (Neon):** Persistência relacional ACID com conexões assíncronas via `asyncpg`.
+3. **Database Serverless (Neon):** Persistência relacional ACID com conexões via `psycopg3`.
 
 ---
 
@@ -44,7 +45,7 @@ A infraestrutura segue o modelo descentralizado PaaS (*Platform as a Service*):
 
 - [Git](https://git-scm.com/)
 - [Docker](https://www.docker.com/) e Docker Compose (recomendado)
-- Ou localmente: **Node.js 18+**, **Python 3.9+** e instância **PostgreSQL**
+- Ou localmente: **Node.js 22+**, **Python 3.14+**, **uv** (gerenciador de pacotes) e instância **PostgreSQL 16**
 
 ---
 
@@ -79,15 +80,9 @@ docker compose up --build
 
 ```bash
 cd backend
-python -m venv venv
-# Linux/macOS:
-source venv/bin/activate
-# Windows:
-# venv\Scripts\activate
-
-pip install -r requirements.txt
+uv sync
 alembic upgrade head
-uvicorn app.main:app --reload --port 8000
+fastapi dev ./src/main.py
 ```
 
 #### Frontend
@@ -106,23 +101,25 @@ npm run dev
 ristoapp/
 ├── backend/                # API FastAPI, modelos e migrações
 │   ├── alembic/            # Versionamento de schema de banco
-│   ├── app/
-│   │   ├── api/            # Rotas e endpoints HTTP
-│   │   ├── core/           # Configurações, logs e segurança
-│   │   ├── models/         # Modelos SQLAlchemy
-│   │   ├── schemas/        # Schemas de validação Pydantic
-│   │   └── services/       # Regras de negócio e conversões
+│   ├── src/
+│   │   ├── main.py         # Entrypoint FastAPI
+│   │   ├── core/           # Configurações, logs e database
+│   │   └── modules/        # Módulos de domínio
+│   │       └── auth/       # Autenticação (router, service, model, schema)
+│   ├── tests/              # Testes pytest
 │   ├── Dockerfile
-│   └── requirements.txt
+│   └── pyproject.toml      # Dependências (gerenciadas via uv)
 ├── frontend/               # SPA Vue 3 + TypeScript
 │   ├── src/
-│   │   ├── components/     # Componentes reutilizáveis
-│   │   ├── views/          # Telas operacionais e dashboards
-│   │   ├── services/       # Clientes HTTP e integração de API
-│   │   └── types/          # Tipagens espelhadas do backend
+│   │   ├── main.ts         # Entrypoint e plugins
+│   │   ├── router.ts       # Vue Router
+│   │   ├── features/       # Feature-Sliced Design (módulos de domínio)
+│   │   │   └── auth/       # Feature de autenticação
+│   │   └── shared/         # API client, utils e assets compartilhados
 │   ├── Dockerfile
 │   └── package.json
 ├── docker-compose.yml      # Orquestração local de desenvolvimento
+├── DOCKER_SETUP.md         # Documentação detalhada do setup Docker
 └── README.md
 ```
 
@@ -133,9 +130,8 @@ ristoapp/
 ### Backend (`backend/.env`)
 ```ini
 ENVIRONMENT=development
-DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/ristoapp
+DATABASE_URL=postgresql+psycopg://ristoapp:ristoapp_dev_password@localhost:5432/ristoapp
 SECRET_KEY=sua-chave-secreta-aqui
-CORS_ORIGINS=["http://localhost:5173"]
 ```
 
 ### Frontend (`frontend/.env`)
