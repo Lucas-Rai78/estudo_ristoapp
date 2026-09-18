@@ -1,0 +1,95 @@
+# =========================
+# Dependências
+# =========================
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# =========================
+# Build & Distribution
+# =========================
+dist/
+dist-ssr/
+*.local
+storybook-static/
+
+# =========================
+# Environment & Secrets
+# =========================
+.env
+.env.local
+.env.*.local
+.env.docker
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# =========================
+# Testing & Coverage
+# =========================
+coverage/
+.nyc_output/
+*.lcov
+
+# =========================
+# IDE & Editor
+# =========================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+.AppleDouble
+.LSOverride
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# =========================
+# OS Files
+# =========================
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+ehthumbs.db
+
+# =========================
+# Runtime & Temporary
+# =========================
+.cache/
+.parcel-cache/
+.next/
+out/
+.nuxt/
+dist
+.cache/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+vite.config.ts.timestamp-*
+.vite
