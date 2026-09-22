@@ -1,1 +1,128 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand Colors */
+  --color-brand-primary: var(--color-brand-primary);
+  --color-brand-hover: var(--color-brand-primary-hover);
+  --color-brand-light: var(--color-brand-primary-light);
+
+  /* Backgrounds */
+  --color-bg-app: var(--color-bg-app);
+  --color-bg-surface: var(--color-bg-surface);
+  --color-bg-sidebar: var(--color-bg-sidebar);
+  --color-bg-hover: var(--color-bg-hover);
+
+  /* Text & Content */
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+
+  /* Borders */
+  --color-border-main: var(--color-border-main);
+  --color-border-light: var(--color-border-light);
+
+  /* Status Colors */
+  --color-status-success: var(--color-status-success);
+  --color-status-success-bg: var(--color-status-success-bg);
+
+  --color-status-warning: var(--color-status-warning);
+  --color-status-warning-bg: var(--color-status-warning-bg);
+
+  --color-status-alert: var(--color-status-alert);
+  --color-status-alert-bg: var(--color-status-alert-bg);
+
+  --color-status-danger: var(--color-status-danger);
+  --color-status-danger-bg: var(--color-status-danger-bg);
+
+  /* Shadows */
+  --shadow-card-sm: 0 1px 3px var(--shadow-color-sm);
+  --shadow-card-md: 0 4px 6px -1px var(--shadow-color-md);
+  --shadow-card-lg: 0 10px 15px -3px var(--shadow-color-lg);
+  --shadow-brand-glow: 0 0 12px var(--shadow-brand-glow);
+}
+
+@layer base {
+  :root {
+    /* Brand Colors */
+    --color-brand-primary: #db2a2a;
+    --color-brand-primary-hover: #b91c1c;
+    --color-brand-primary-light: #fef2f2;
+
+    /* Backgrounds */
+    --color-bg-app: #f3f4f6;
+    --color-bg-surface: #ffffff;
+    --color-bg-sidebar: #edf0f2; /* Corrigido de ##edf0f2 */
+    --color-bg-hover: #f3f4f6;
+
+    /* Text & Content */
+    --color-text-primary: #0F172A; /* Corrigido de ##0F172A */
+    --color-text-secondary: #475569;
+    --color-text-muted: #64748B;
+
+    /* Borders & Dividers */
+    --color-border-main: #e2e8f0cc; /* Corrigido de ##e2e8f0cc */
+    --color-border-light: #e2e8f0ff; /* Corrigido de ##e2e8f0ff */
+
+    /* Status & Feedback Colors */
+    --color-status-success: #059669; /* Corrigido de ##059669 */
+    --color-status-success-bg: #D1FAE5; /* Corrigido de ##D1FAE5 */
+
+    --color-status-warning: #D97706;
+    --color-status-warning-bg: #FDE68A;
+
+    --color-status-alert: #A16207;
+    --color-status-alert-bg: #FEF08A;
+
+    --color-status-danger: #DC2626;
+    --color-status-danger-bg: #fecaca;
+
+    /* Shadows & Overlays */
+    --shadow-color-sm: rgba(0, 0, 0, 0.05);
+    --shadow-color-md: rgba(0, 0, 0, 0.08);
+    --shadow-color-lg: rgba(0, 0, 0, 0.12);
+    --shadow-brand-glow: rgba(220, 38, 38, 0.25);
+  }
+
+  .dark {
+    /* Brand Colors */
+    --color-brand-primary: #EA2B2B;
+    --color-brand-primary-hover: #b02626;
+    --color-brand-primary-light: #2d1010;
+
+    /* Backgrounds */
+    --color-bg-app: #0f1318;
+    --color-bg-surface: #16181B;
+    --color-bg-sidebar: #121316;
+    --color-bg-hover: #1f2630;
+    
+    /* Text & Content */
+    --color-text-primary: #f9fafb;
+    --color-text-secondary: #9ca3af;
+    --color-text-muted: #6b7280;
+
+    /* Borders & Dividers */
+    --color-border-main: #252d38;
+    --color-border-light: #1f2630;
+
+    /* Status & Feedback Colors */
+    --color-status-success: #34D399;
+    --color-status-success-bg: #022C22;
+
+    --color-status-warning: #fbbf24;
+    --color-status-warning-bg: #78350f;
+
+    --color-status-alert: #FBBF24;
+    --color-status-alert-bg: #451A03;
+
+    --color-status-danger: #f87171;
+    --color-status-danger-bg: #7f1d1d;
+
+    /* Shadows & Overlays */
+    --shadow-color-sm: rgba(0, 0, 0, 0.3);
+    --shadow-color-md: rgba(0, 0, 0, 0.45);
+    --shadow-color-lg: rgba(0, 0, 0, 0.6);
+    --shadow-brand-glow: rgba(239, 68, 68, 0.35);
+  }
+}
