@@ -2,18 +2,14 @@ import { z } from 'zod'
 
 export const loginSchema = z.object({
   email: z
-    .string({
-      message: 'O e-mail é obrigatório',
-    })
+    .string()
     .trim()
     .min(1, 'O e-mail é obrigatório')
     .email('Digite um e-mail válido')
     .max(254, 'O e-mail informado é muito longo'),
 
   password: z
-    .string({
-      message: 'A senha é obrigatória',
-    })
+    .string()
     .min(1, 'A senha é obrigatória')
     .min(8, 'A senha deve possuir pelo menos 8 caracteres')
     .max(72, 'A senha deve possuir no máximo 72 caracteres'),
@@ -29,27 +25,49 @@ export type LoginFieldErrors = Partial<
   Record<LoginField, string>
 >
 
-export type LoginStatus =
-  | {
-      status: 'idle'
-    }
-  | {
-      status: 'validating'
-    }
-  | {
-      status: 'invalid'
-    }
-  | {
-      status: 'ready'
-      payload: LoginPayload
-    }
-  | {
-      status: 'submitting'
-    }
-  | {
-      status: 'error'
-      message: string
-    }
+export const registerSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, 'O nome é obrigatório')
+      .min(3, 'Digite pelo menos 3 caracteres')
+      .max(100, 'O nome deve possuir no máximo 100 caracteres'),
+
+    email: z
+      .string()
+      .trim()
+      .min(1, 'O e-mail é obrigatório')
+      .email('Digite um e-mail válido')
+      .max(254, 'O e-mail informado é muito longo'),
+
+    password: z
+      .string()
+      .min(1, 'A senha é obrigatória')
+      .min(8, 'A senha deve possuir pelo menos 8 caracteres')
+      .max(72, 'A senha deve possuir no máximo 72 caracteres'),
+
+    confirmPassword: z
+      .string()
+      .min(1, 'Confirme sua senha'),
+  })
+  .refine(
+    (data) => data.password === data.confirmPassword,
+    {
+      message: 'As senhas não coincidem',
+      path: ['confirmPassword'],
+    },
+  )
+
+export type RegisterForm = z.input<typeof registerSchema>
+
+export type RegisterPayload = z.output<typeof registerSchema>
+
+export type RegisterField = keyof RegisterForm
+
+export type RegisterFieldErrors = Partial<
+  Record<RegisterField, string>
+>
 
 export interface AuthUser {
   id: string
@@ -62,8 +80,13 @@ export interface LoginResponse {
   user: AuthUser
 }
 
+export interface RegisterResponse {
+  user: AuthUser
+}
+
 export type AuthErrorCode =
   | 'INVALID_CREDENTIALS'
+  | 'EMAIL_ALREADY_EXISTS'
   | 'USER_DISABLED'
   | 'RATE_LIMITED'
   | 'NETWORK_ERROR'
@@ -85,3 +108,5 @@ export type Result<TData, TError = AuthError> =
     }
 
 export type LoginResult = Result<LoginResponse>
+
+export type RegisterResult = Result<RegisterResponse>
