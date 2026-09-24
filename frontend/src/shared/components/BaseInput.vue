@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+type InputAutocomplete =
+  'off' | 'on' | 'email' | 'username' | 'current-password' | 'new-password'
+
 interface Props {
   modelValue: string | number | null
   id?: string
   label?: string
   type?: string
   placeholder?: string
+  autocomplete?: InputAutocomplete
   disabled?: boolean
   readonly?: boolean
   required?: boolean
@@ -18,11 +22,12 @@ const props = withDefaults(defineProps<Props>(), {
   id: () => `input-${Math.random().toString(36).substring(2, 9)}`,
   type: 'text',
   placeholder: '',
+  autocomplete: 'off',
   disabled: false,
   readonly: false,
   required: false,
   error: '',
-  hint: ''
+  hint: '',
 })
 
 const emit = defineEmits<{
@@ -43,7 +48,7 @@ const inputClasses = computed(() => [
   props.error
     ? 'border-2 border-status-danger focus:ring-2 focus:ring-status-danger-bg'
     : 'border border-border-main focus:border-brand-primary focus:ring-2 focus:ring-brand-light',
-  props.disabled ? 'opacity-60 cursor-not-allowed bg-bg-hover' : ''
+  props.disabled ? 'opacity-60 cursor-not-allowed bg-bg-hover' : '',
 ])
 </script>
 
@@ -71,16 +76,18 @@ const inputClasses = computed(() => [
         :type="type"
         :value="modelValue"
         :placeholder="placeholder"
+        :autocomplete="autocomplete"
         :disabled="disabled"
         :readonly="readonly"
         :required="required"
         :class="[
           inputClasses,
-          $slots['icon-left'] ? 'pl-9' : '',$slots['icon-right'] ? 'pr-9' : ''
+          $slots['icon-left'] ? 'pl-9' : '',
+          $slots['icon-right'] ? 'pr-9' : '',
         ]"
         @input="handleInput"
-        @focus="$emit('focus',$event)"
-        @blur="$emit('blur',$event)"
+        @focus="$emit('focus', $event)"
+        @blur="$emit('blur', $event)"
       />
 
       <div
