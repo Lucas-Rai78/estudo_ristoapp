@@ -1,17 +1,29 @@
 from fastapi import FastAPI
-import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
-import logging
-from core.logging import setup_logging
+from src.core.database import Base, engine
+from src.modules.auth.router import router as auth_router
 
-setup_logging()
+# Gera automaticamente as tabelas no banco de dados ao iniciar
+Base.metadata.create_all(bind=engine)
 
-logger = logging.getLogger(__name__)
+app = FastAPI(title="Gerenciador de Produtos API")
 
-app = FastAPI(title="RistoApp Backend", version="1.0.0")
+# Habilita o CORS para aceitar requisições do frontend em Vue 3
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-def main():
-    logger.info("Starting the RistoApp backend application...")
-    
-if __name__ == "__main__":
-    main()
+app.include_router(auth_router)
+
+@app.get("/")
+def status_api():
+    return {"status": "API rodando perfeitamente"}
+
+from src.modules.auth.router import router as auth_router
+
+app.include_router(auth_router)
