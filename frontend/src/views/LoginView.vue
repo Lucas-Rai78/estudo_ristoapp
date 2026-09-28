@@ -1,184 +1,141 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-import BaseInput from '@/shared/components/BaseInput.vue'
-import BaseButton from '@/shared/components/BaseButton.vue'
+import BaseInput from '../shared/components/BaseInput.vue'
+import BaseButton from '../shared/components/BaseButton.vue'
+import AuthLayout from '../features/auth/Component.vue'
 
 import {
   loginSchema,
-  type LoginField,
-  type LoginFieldErrors,
   type LoginForm,
-} from '@/types/types'
+} from '../features/auth/schemas'
 
-const emit = defineEmits<{
-  (event: 'register'): void
-}>()
+import { login } from '../features/auth/service'
+import { useAuth } from '../features/auth/composable'
+import {
+  authErrorMessage,
+  fieldErrors,
+} from '../shared/utils'
+
+const router = useRouter()
+const route = useRoute()
+const { saveSession } = useAuth()
 
 const form = reactive<LoginForm>({
   email: '',
   password: '',
 })
 
-const errors = ref<LoginFieldErrors>({})
+const errors = ref<
+  Partial<Record<keyof LoginForm, string>>
+>({})
 
-const success = ref(false)
+const feedback = ref('')
+const loading = ref(false)
 
-function clearFieldError(field: LoginField): void {
-  if (!errors.value[field]) {
-    return
-  }
+async function submit() {
+  if (loading.value) return
 
-  const nextErrors = {
-    ...errors.value,
-  }
-
-  delete nextErrors[field]
-
-  errors.value = nextErrors
-}
-
-function handleSubmit(): void {
-  errors.value = {}
-  success.value = false
+  feedback.value = ''
 
   const result = loginSchema.safeParse(form)
 
   if (!result.success) {
-    const fieldErrors = result.error.flatten().fieldErrors
-
-    errors.value = {
-      email: fieldErrors.email?.[0],
-      password: fieldErrors.password?.[0],
-    }
-
+    errors.value = fieldErrors(result.error)
     return
   }
 
-  success.value = true
+  errors.value = {}
+  loading.value = true
 
-  /**
-   * Futuramente:
-   *
-   * await authService.login(result.data)
-   */
+  try {
+    const response = await login(result.data)
+    saveSession(response)
 
-  console.log('Login válido:', result.data)
+    const redirect = route.query.redirect
+
+    await router.replace(
+      typeof redirect === 'string' &&
+      redirect.startsWith('/') &&
+      !redirect.startsWith('//')
+        ? redirect
+        : { name: 'welcome' },
+    )
+  } catch (error) {
+    feedback.value = authErrorMessage(error)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
 <template>
-  <main
-    class="min-h-screen bg-bg-app flex items-center justify-center p-4 sm:p-6"
+  <AuthLayout
+    title="Bem-vindo de volta"
+    subtitle="Entre na sua conta para continuar."
   >
-    <section class="w-full max-w-md">
-      <!-- Cabeçalho -->
-      <header class="mb-8 text-center">
-        <div
-          class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-primary shadow-brand-glow"
-        >
-          <svg
-            class="h-6 w-6 text-white"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              d="M12 2L20 6V12C20 17 16.5 21 12 22C7.5 21 4 17 4 12V6L12 2Z"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-
-            <path
-              d="M9 12L11 14L15 10"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </div>
-
-        <h1 class="text-2xl font-bold text-text-primary">
-          Bem-vindo
-        </h1>
-
-        <p class="mt-2 text-sm text-text-secondary">
-          Entre com suas credenciais para acessar sua conta.
-        </p>
-      </header>
-
-      <!-- Card -->
-      <div
-        class="rounded-xl border border-border-main bg-bg-surface p-6 shadow-card-md sm:p-8"
+    <form
+      class="space-y-5"
+      novalidate
+      @submit.prevent="submit"
+    >
+      <p
+        v-if="route.query.registered === '1'"
+        role="status"
+        class="rounded-lg bg-green-50 p-3 text-sm text-green-800"
       >
-        <form
-          class="flex flex-col gap-5"
-          novalidate
-          @submit.prevent="handleSubmit"
-        >
-          <BaseInput
-            v-model="form.email"
-            id="login-email"
-            label="E-mail"
-            type="email"
-            placeholder="nome@empresa.com"
-            required
-            :error="errors.email"
-            @focus="clearFieldError('email')"
-          />
+        Conta criada. Faça login para continuar.
+      </p>
 
-          <BaseInput
-            v-model="form.password"
-            id="login-password"
-            label="Senha"
-            type="password"
-            placeholder="Digite sua senha"
-            required
-            :error="errors.password"
-            @focus="clearFieldError('password')"
-          />
+      <p
+        v-if="feedback"
+        role="alert"
+        class="rounded-lg bg-red-50 p-3 text-sm text-status-danger"
+      >
+        {{ feedback }}
+      </p>
 
-          <div
-            v-if="success"
-            class="rounded-lg bg-status-success-bg px-3 py-2.5"
-          >
-            <p
-              class="text-xs font-medium text-status-success"
-            >
-              Login validado com sucesso.
-            </p>
-          </div>
+      <BaseInput
+        id="login-email"
+        v-model="form.email"
+        label="E-mail"
+        type="email"
+        autocomplete="email"
+        :error="errors.email"
+        :disabled="loading"
+        @update:model-value="errors.email = undefined"
+      />
 
-          <BaseButton
-            type="submit"
-            variant="primary"
-            size="lg"
-            full-width
-          >
-            Entrar
-          </BaseButton>
+      <BaseInput
+        id="login-password"
+        v-model="form.password"
+        label="Senha"
+        type="password"
+        autocomplete="current-password"
+        :error="errors.password"
+        :disabled="loading"
+        @update:model-value="errors.password = undefined"
+      />
 
-          <div
-            class="border-t border-border-main pt-5 text-center"
-          >
-            <p class="text-sm text-text-secondary">
-              Ainda não possui uma conta?
+      <BaseButton
+        type="submit"
+        :loading="loading"
+        full-width
+      >
+        Entrar
+      </BaseButton>
+    </form>
 
-              <button
-                type="button"
-                class="font-semibold text-brand-primary hover:text-brand-hover"
-                @click="emit('register')"
-              >
-                Criar conta
-              </button>
-            </p>
-          </div>
-        </form>
-      </div>
-    </section>
-  </main>
+    <p class="mt-6 text-center text-sm text-text-secondary">
+      Ainda não tem conta?
+
+      <RouterLink
+        to="/cadastro"
+        class="font-semibold text-brand-primary hover:underline"
+      >
+        Criar conta
+      </RouterLink>
+    </p>
+  </AuthLayout>
 </template>

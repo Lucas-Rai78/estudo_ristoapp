@@ -1,13 +1,30 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
+import { authRoutes } from './features/auth/route'
+import { useAuth } from './features/auth/composable'
 
-// Importa todos os route.ts das features dinamicamente
-const routeModules = import.meta.glob('../features/**/route.ts', { eager: true })
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', redirect: '/bem-vindo' },
 
-const routes: RouteRecordRaw[] = Object.values(routeModules).flatMap(
-  (mod: any) => (Array.isArray(mod.default) ? mod.default : [mod.default]).filter(Boolean),
-)
-
-export const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
+    // Mantenha aqui as demais rotas do seu projeto.
+    ...authRoutes,
+  ],
 })
+
+router.beforeEach(to => {
+  const { isAuthenticated } = useAuth()
+
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
+    return {
+      name: 'login',
+      query: { redirect: to.fullPath },
+    }
+  }
+
+  if (to.meta.guest && isAuthenticated.value) {
+    return { name: 'welcome' }
+  }
+})
+
+export default router
