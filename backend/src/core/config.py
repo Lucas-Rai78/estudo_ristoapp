@@ -1,16 +1,14 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+from pydantic_settings import BaseSettings
 
-# enviroment configuration
 class Settings(BaseSettings):
-    
-    
-    DATABASE_URL_DEVELOP: str
-    DATABASE_URL_DEVELOP_POOLED: str
-    
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore"
-    )
-    
+    PROJECT_NAME: str = "Gerenciador de Produtos API"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./test.db")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "chave_secreta_desenvolvimento_mude_em_producao")
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
+    class Config:
+        env_file = ".env"
+
 settings = Settings()

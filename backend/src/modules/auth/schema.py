@@ -1,6 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
 
-# DTO para cadastro
 class UserCreate(BaseModel):
     name: str = Field(..., min_length=3, max_length=100)
     email: EmailStr
@@ -15,9 +14,14 @@ class AuthUser(BaseModel):
     name: str
     email: EmailStr
 
+    class Config:
+        from_attributes = True
+
 class LoginResponse(BaseModel):
-    accessToken: str
+    access_token: str
+    token_type: str = "bearer"
     user: AuthUser
 
 class RegisterResponse(BaseModel):
+    message: str = "Usuário cadastrado com sucesso"
     user: AuthUser
