@@ -1,29 +1,25 @@
-# Async database connection and session management for SQLAlchemy.
-from collections.abc import AsyncGenerator
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from src.core.config import settings
 
-engine = create_async_engine(
-    settings.DATABASE_URL_DEVELOP_POOLED,
-    echo=True,
+
+engine = create_engine(
+    settings.DATABASE_URL,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=5,
-    pool_timeout=30,
 )
 
-AsyncSessionLocal = async_sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
+SessionLocal = sessionmaker(
+    autocommit=False,
     autoflush=False,
-    expire_on_commit=False,
+    bind=engine,
 )
 
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSessionLocal() as session:
-        yield session
+
+def get_db():
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()

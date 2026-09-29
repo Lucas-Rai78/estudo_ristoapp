@@ -43,7 +43,7 @@ class AuthService:
                 detail="INVALID_CREDENTIALS"
             )
 
-        access_token = criar_token_acesso(dados={"sub": str(usuario.id)})
+        access_token = criar_token_acesso(data={"sub": str(usuario.id)})
 
         return LoginResponse(
             access_token=access_token,
