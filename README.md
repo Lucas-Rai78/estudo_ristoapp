@@ -68,9 +68,9 @@ cp frontend/.env.example frontend/.env
 docker compose up --build
 ```
 
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:8000`
-- Documentação interativa Swagger: `http://localhost:8000/docs`
+- Frontend: `http://localhost:5174`
+- Backend API: `http://localhost:8001`
+- Documentação interativa Swagger: `http://localhost:8001/docs`
 
 ---
 
